@@ -1,7 +1,7 @@
 import pygame
 import random
 import os
-
+import math
 FPS = 60
 
 pygame.init()
@@ -251,27 +251,40 @@ class Player(pygame.sprite.Sprite):
 
 
 usuf = Player((100, 100))
-
-
-class Mob(pygame.sprite.Sprite):
-    def __init__(self, room, activate, x, y):
-        super().__init__(mob_group, all_sprites)
-        self.coordinates_of_mob = []
-        self.activate = activate
-        self.room = room
-        self.x = random.randint(0, 560)
-        self.y = random.randint(0, 560)
-
-
-class Begaet(Mob):
-    image = load_image("Player.png", -1)
-
-    def __init__(self, room, activate, x, y):
-        super().__init__(room, activate, x, y)
-        self.image = pygame.transform.scale(Begaet.image, (50, 50))
+patrons=pygame.sprite.Group()
+strelky=pygame.sprite.Group()
+class Patrons(pygame.sprite.Sprite):
+    image = pygame.transform.scale(load_image("pula_migela.png"),(20,10))
+    def __init__(self,list,group):
+        super().__init__(group)
+        self.list=list
+        self.image = Patrons.image
         self.rect = self.image.get_rect()
-        self.rect.x = self.x + room[0] * const
-        self.rect.y = self.y + room[1] * const
+        self.rect.x = self.list[0][0]
+        self.rect.y = self.list[0][1]
+    def update(self):
+        self.rect.x+=self.list[1][0]
+        self.rect.y+=self.list[1][1]
+
+class Begaet(pygame.sprite.Sprite):
+    image = load_image("kek.png", -1)
+    def __init__(self,group,x,y, sheet, columns, rows,speed):
+        super().__init__(group)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.speed=speed
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
 
     def move(self):
         a = usuf.rect.x
@@ -284,18 +297,198 @@ class Begaet(Mob):
             self.rect.y += 1
         elif self.rect.y > b:
             self.rect.y -= 1
+    def update(self):
+        x=usuf.rect.x-self.rect.x
+        y=usuf.rect.y-self.rect.y
+        if(x==0 and y==0):
+            pass
+        else:
+            if(x*y<0):
+                if(x<=0):
+                    if(abs(x)>abs(y)):
+                            self.left()
+                    else:
+                            self.forward()
+                else:
+                     if(abs(x)>abs(y)):
+                            self.right()
+                     else:
+                            self.back()
+            else:
+                if(abs(x)>abs(y)):
+                    if(x>=0):
+                        self.right()
+                    else:
+                        self.left()
+                else:
+                    if(x>=0):
+                        self.forward()
+                    else:
+                        self.back()
+
+    def left(self):
+        self.cur_frame+=1
+        self.image = self.frames[4+(self.cur_frame + 1) %4]
+        self.rect.x-=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,beguni,False))>1):
+
+                self.right()
 
 
-class Strelyaet(Mob):
-    def __init__(self, room, activate, x, y):
-        super().__init__(room, activate, x, y)
-        sprite = pygame.sprite.Sprite()
-        sprite.image = Begaet.image
-        sprite.rect = sprite.image.get_rect()
-        sprite.rect.x = self.x + room[0] * const
-        sprite.rect.y = self.y + room[1] * const
+
+    def right(self):
+        self.cur_frame+=1
+        self.image = self.frames[8+(self.cur_frame + 1) %4]
+        self.rect.x+=self.speed
+        if(len(pygame.sprite.spritecollide(self,beguni,False))>1):
+                self.left()
 
 
+
+    def back(self):
+        self.cur_frame+=1
+        self.image = self.frames[12+(self.cur_frame + 1) %4]
+        self.rect.y-=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,beguni,False))>1):
+                self.forward()
+
+    def forward(self):
+        self.cur_frame+=1
+        self.image = self.frames[0+(self.cur_frame + 1)%4]
+        self.rect.y+=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,beguni,False))>1):
+            self.back()
+
+
+
+class strelyaet(pygame.sprite.Sprite):
+    image = pygame.transform.scale(load_image('migel.png',-1),(50,50))
+    image.set_colorkey((255,255,255))
+    def __init__(self,group,x,y, sheet, columns, rows,speed):
+        super().__init__(group)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.speed=speed
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self,shoot=False):
+        x=usuf.rect.x-self.rect.x
+        y=usuf.rect.y-self.rect.y
+        if(x==0 and y==0):
+            pass
+        else:
+            if(x*y<0):
+                if(x<0):
+                    if(abs(x)>abs(y)):
+                            self.left()
+                    else:
+                            self.forward()
+                else:
+                     if(abs(x)>abs(y)):
+                            self.right()
+                     else:
+                            self.back()
+            else:
+                if(abs(x)>abs(y)):
+                    if(x>0):
+                        self.right()
+                    else:
+                        self.left()
+                else:
+                    if(x > 0):
+                        self.forward()
+                    else:
+                        self.back()
+        if(shoot):
+            start_pos=(self.rect.x,self.rect.y)
+            cel_x=usuf.rect.x-self.rect.x+16+random.randint(-32,32)
+            cel_y=usuf.rect.y-self.rect.y+24+random.randint(-48,48)
+            put=math.sqrt(cel_x**2+cel_y**2)
+
+
+
+            speed=(int(cel_x*(30/put)),int(cel_y*(30/put)))
+            Patrons([start_pos,speed],patrons)
+        else:
+            pass
+
+    def left(self):
+        self.cur_frame+=1
+        self.image = self.frames[4+(self.cur_frame + 1) %4]
+        self.rect.x-=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,strelky,False))>1):
+
+                self.right()
+
+
+
+    def right(self,shag=5):
+        self.cur_frame+=1
+        self.image = self.frames[8+(self.cur_frame + 1) %4]
+        self.rect.x+=self.speed
+        if(len(pygame.sprite.spritecollide(self,strelky,False))>1):
+                self.left()
+
+
+
+    def back(self,shag=5):
+        self.cur_frame+=1
+        self.image = self.frames[12+(self.cur_frame + 1) %4]
+        self.rect.y-=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,strelky,False))>1):
+                self.forward(10)
+
+    def forward(self,shag=5):
+        self.cur_frame+=1
+        self.image = self.frames[0+(self.cur_frame + 1)%4]
+        self.rect.y+=self.speed
+        s=random.randint(0,3)
+        if(len(pygame.sprite.spritecollide(self,strelky,False))>1):
+            self.back(10)
+class suduck(pygame.sprite.Sprite):
+    image = pygame.transform.scale(load_image('migel.png',-1),(50,50))
+    image.set_colorkey((255,255,255))
+    def __init__(self,group,x,y, sheet, columns, rows):
+        super().__init__(group)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+    def update(self):
+        self.cur_frame+=1
+        self.image = self.frames[self.cur_frame %2]
+sunduki=pygame.sprite.Group()
+d=suduck(sunduki,400,250,pygame.transform.scale(load_image('sunduk.jpg',-1),(100,100)),2,1)
+
+beguni=pygame.sprite.Group()
+a=strelyaet(strelky,300,200,load_image('sold.jpg',-1),4,4,3)
+b=strelyaet(strelky,500,400,load_image('sold.jpg',-1),4,4,4)
+c=Begaet(beguni,500,400,load_image('kek.png',-1),4,4,10)
+k=Begaet(beguni,800,100,load_image('kek.png',-1),4,4,8)
 Border(50, 30, width - 98, 30)
 Border(50, height - 60, width - 98, height - 60)
 Border(50, 30, 50, height - 60)
@@ -303,16 +496,37 @@ Border(width - 98, 30, width - 98, height - 60)
 
 clock = pygame.time.Clock()
 running = True
+MYEVENTTYPE=30
+pygame.time.set_timer(MYEVENTTYPE, 200)
+Puliupdate=29
+pygame.time.set_timer(Puliupdate, 1000)
 while running:
+    screen.fill((255,255,255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if(event.type==MYEVENTTYPE):
+            strelky.update()
+            patrons.update()
+            beguni.update()
+            pygame.time.set_timer(MYEVENTTYPE, 200)
+        if(event.type==Puliupdate):
+            strelky.update(True)
+            sunduki.update()
+            pygame.time.set_timer(Puliupdate, 1500)
+
     usuf.get_event_keyboard(pygame.key.get_pressed())
     screen.blit(room_image, (0, 0))
     all_sprites.draw(screen)
     for x in mob_group:
         x.move()
     all_sprites.update()
+    all_sprites.draw(screen)
+    strelky.draw(screen)
+    patrons.draw(screen)
+    beguni.draw(screen)
+    sunduki.draw(screen)
     pygame.display.flip()
     clock.tick(60)
+
 pygame.quit()
