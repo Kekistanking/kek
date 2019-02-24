@@ -12,6 +12,7 @@ mobs = pygame.sprite.Group()
 floor=0
 all_sprites = pygame.sprite.Group()
 mob_group = pygame.sprite.Group()
+
 player_group = pygame.sprite.Group()
 player_bullets = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
@@ -78,7 +79,55 @@ class Border(pygame.sprite.Sprite):
             self.add(horizontal_borders)
             self.image = pygame.Surface([x2 - x1, 1])
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
+class PlayerBullet(pygame.sprite.Sprite):
+    ball = load_image("ball.jpg", -1)
+    ball = pygame.transform.scale(ball, (20, 20))
+    ball_crush = load_image("ball_crush.jpg", -1)
+    ball_crush = pygame.transform.scale(ball_crush, (20, 20))
 
+    def __init__(self, x, y, t, speed, direction):
+        super().__init__(all_sprites, player_bullets)
+        self.image = PlayerBullet.ball
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = speed
+        self.time = t
+        self.direction = direction
+
+    def update(self):
+        self.time += 1
+        if self.speed == -1 or self.speed ==-2:
+            self.speed -=1
+            return
+        if self.direction == "right":
+            self.rect.x += self.speed
+            if self.time >= 35:
+                self.speed -= 1
+                self.rect.y += 2
+        elif self.direction == "left":
+            self.rect.x -= self.speed
+            if self.time >= 35:
+                self.speed -= 1
+                self.rect.y += 2
+        elif self.direction == "up":
+            self.rect.y -= self.speed
+            if self.time >= 35:
+                self.speed -= 1
+        elif self.direction == "down":
+            self.rect.y += self.speed
+            if self.time >= 35:
+                self.speed -= 1
+        if self.speed == 3:
+            self.image = PlayerBullet.ball_crush
+        if self.speed <= 0:
+            all_sprites.remove(self)
+            player_bullets.remove(self)
+        if pygame.sprite.spritecollideany(self,vertical_borders):
+            self.image = PlayerBullet.ball_crush
+            self.speed = -1
+       # for _ in all_sprites.sprites():
+           # pass
 
 class StaticObject(pygame.sprite.Sprite):
     def __init__(self, sheet, x, y):
@@ -172,6 +221,8 @@ class Player(pygame.sprite.Sprite):
         self.get_borders()
         self.life=100
         self.is_change=True
+        self.shoot_cooldown = 0
+        self.bullet_speed = 10
 
 
     def get_event_keyboard(self, array):
@@ -282,8 +333,22 @@ class Player(pygame.sprite.Sprite):
                     self.move_right = True
                     self.move_up = True
                     self.move_down = False
+        if array[pygame.K_UP]:
+            self.anim = "up"
+            self.shoot("up")
+        elif array[pygame.K_DOWN]:
+            self.anim = "down"
+            self.shoot("down")
+        elif array[pygame.K_RIGHT]:
+            self.anim = "right"
+            self.shoot("right")
+        elif array[pygame.K_LEFT]:
+            self.anim = "left"
+            self.shoot("left")
 
     def update(self):
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
         movement_phase = (self.move_counter // 4) % 8
         movement_phase_slow = (self.move_counter // 8) % 8
         dx = self.change[0] * 5
@@ -350,8 +415,24 @@ class Player(pygame.sprite.Sprite):
 
 
 
-    def shoot(self):
-        pass
+    def shoot(self,direction):
+        if self.shoot_cooldown == 0:
+            t = 0
+            speed = self.bullet_speed
+            if direction == "right":
+                x = self.rect.x + self.rect.w
+                y = random.randint(self.rect.y - 10, self.rect.y + 10)
+            elif direction == "left":
+                x = self.rect.x - 20
+                y = random.randint(self.rect.y - 10, self.rect.y + 10)
+            elif direction == "up":
+                x = random.randint(self.rect.x + 20, self.rect.x + 40)
+                y = self.rect.y - 20
+            elif direction == "down":
+                x = random.randint(self.rect.x+20, self.rect.x + 40)
+                y = self.rect.y + self.rect.h -30
+            PlayerBullet(x, y, t, speed, direction)
+            self.shoot_cooldown = 20
 
     def get_borders(self):
         x = self.rect.x
@@ -787,7 +868,7 @@ while running:
                     usuf.change_room((0,0))
 
 
-            if(event.type==BEGUNI and not is_usuf_killed):
+        if(event.type==BEGUNI and not is_usuf_killed):
                  x=pygame.sprite.spritecollide(usuf,beguni,False)
                  if(usuf.life-len(x)*2<=0):
                         x=usuf.rect.x
@@ -804,9 +885,9 @@ while running:
                         is_grob=True
                  else:
                         if(x!=[]):
-                            usuf.life-=len(x)
+                            usuf.life-=len(x)*2
 
-                 pygame.time.set_timer(BEGUNI, 100)
+                 pygame.time.set_timer(BEGUNI, 200)
 
 
 
@@ -820,7 +901,7 @@ while running:
         _.move()
     objects.update()
     all_sprites.update()
-
+    objects.update()
     strelky.draw(screen)
     patrons.draw(screen)
     beguni.draw(screen)
