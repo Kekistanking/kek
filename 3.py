@@ -2,25 +2,28 @@ import pygame
 import random
 import os
 import math
+
 FPS = 80
 pygame.init()
 size = width, height = 960, 620
 screen = pygame.display.set_mode(size)
 const = 3
 mobs = pygame.sprite.Group()
-floor=0
+floor = 0
 all_sprites = pygame.sprite.Group()
 mob_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 player_bullets = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
 horizontal_borders = pygame.sprite.Group()
-life=pygame.sprite.Group()
+life = pygame.sprite.Group()
 objects = pygame.sprite.Group()
-hod_up=pygame.sprite.Group()
-hod_down=pygame.sprite.Group()
-hod_left=pygame.sprite.Group()
-hod_right=pygame.sprite.Group()
+hod_up = pygame.sprite.Group()
+hod_down = pygame.sprite.Group()
+hod_left = pygame.sprite.Group()
+hod_right = pygame.sprite.Group()
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     try:
@@ -35,41 +38,65 @@ def load_image(name, colorkey=None):
             colorkey = image.get_at((3, 3))
         image.set_colorkey(colorkey)
     return image
+
+
 room_image = load_image("room1.bmp")
 room_image = pygame.transform.scale(room_image, (960, 540))
+
+
 class information_about_pers():
-    def __init__(self,a,b,list=[]):
-        self.start_x=a
-        self.start_y=b
-        self.finish_x=width
-        self.finish_y=height
-        self.list=list
-    def minimap(self,room):
+    def __init__(self, a, b, list=[]):
+        self.start_x = a
+        self.start_y = b
+        self.finish_x = width
+        self.finish_y = height
+        self.list = list
+
+    def minimap(self, room):
         for i in range(3):
             for u in range(3):
-                if(i*3+u==room):
-                    pygame.draw.rect(screen,(255,0,0),[self.start_x+(u*(height-self.start_y)//3),self.start_y+(i*(height-self.start_y)//3),(height-self.start_y)//3-1,(height-self.start_y)//3-1],0)
+                if (i * 3 + u == room):
+                    pygame.draw.rect(screen, (255, 0, 0), [self.start_x + (u * (height - self.start_y) // 3),
+                                                           self.start_y + (i * (height - self.start_y) // 3),
+                                                           (height - self.start_y) // 3 - 1,
+                                                           (height - self.start_y) // 3 - 1], 0)
                 else:
-                    pygame.draw.rect(screen,(100,100,100),[self.start_x+(u*(height-self.start_y)//3),self.start_y+(i*(height-self.start_y)//3),(height-self.start_y)//3-1,(height-self.start_y)//3-1],0)
+                    pygame.draw.rect(screen, (100, 100, 100), [self.start_x + (u * (height - self.start_y) // 3),
+                                                               self.start_y + (i * (height - self.start_y) // 3),
+                                                               (height - self.start_y) // 3 - 1,
+                                                               (height - self.start_y) // 3 - 1], 0)
+
     def inventar(self):
         for i in range(3):
             for u in range(3):
-                if(i*3+u in self.list):
-                    pygame.draw.rect(screen,(0,255,0),[self.finish_x-((i+1)*(height-self.start_y)//3),self.finish_y-((u+1)*(height-self.start_y)//3),(height-self.start_y)//3-1,(height-self.start_y)//3-1],0)
+                if (i * 3 + u in self.list):
+                    pygame.draw.rect(screen, (0, 255, 0), [self.finish_x - ((i + 1) * (height - self.start_y) // 3),
+                                                           self.finish_y - ((u + 1) * (height - self.start_y) // 3),
+                                                           (height - self.start_y) // 3 - 1,
+                                                           (height - self.start_y) // 3 - 1], 0)
                 else:
-                    pygame.draw.rect(screen,(0,0,0),[self.finish_x-((i+1)*(height-self.start_y)//3),self.finish_y-((u+1)*(height-self.start_y)//3),(height-self.start_y)//3-1,(height-self.start_y)//3-1],0)
+                    pygame.draw.rect(screen, (0, 0, 0), [self.finish_x - ((i + 1) * (height - self.start_y) // 3),
+                                                         self.finish_y - ((u + 1) * (height - self.start_y) // 3),
+                                                         (height - self.start_y) // 3 - 1,
+                                                         (height - self.start_y) // 3 - 1], 0)
 
-    def life(self,life):
-        len=int(width-(self.finish_y-self.start_y)*2)
-        green=int(len*(life/100))
-        pygame.draw.rect(screen,(0,255,0),[self.start_x,self.start_y,self.finish_x,self.finish_y],0)
-        if(life!=100):
-            pygame.draw.rect(screen,(0,0,0),[green+self.finish_y-self.start_y,self.start_y,len-green,self.finish_y],0)
-    def get_key(self,number):
-        i=number//3
-        u=number%3
+    def life(self, life):
+        len = int(width - (self.finish_y - self.start_y) * 2)
+        green = int(len * (life / 100))
+        pygame.draw.rect(screen, (0, 255, 0), [self.start_x, self.start_y, self.finish_x, self.finish_y], 0)
+        if (life != 100):
+            pygame.draw.rect(screen, (0, 0, 0),
+                             [green + self.finish_y - self.start_y, self.start_y, len - green, self.finish_y], 0)
 
-        pygame.draw.rect(screen,(0,255,0),[self.finish_x-((i+1)*(height-self.start_y)//3),self.finish_y-((u+1)*(height-self.start_y)//3),(height-self.start_y)//3-1,(height-self.start_y)//3-1],0)
+    def get_key(self, number):
+        i = number // 3
+        u = number % 3
+
+        pygame.draw.rect(screen, (0, 255, 0), [self.finish_x - ((i + 1) * (height - self.start_y) // 3),
+                                               self.finish_y - ((u + 1) * (height - self.start_y) // 3),
+                                               (height - self.start_y) // 3 - 1, (height - self.start_y) // 3 - 1], 0)
+
+
 class Border(pygame.sprite.Sprite):
     # строго вертикальный или строго горизонтальный отрезок
     def __init__(self, x1, y1, x2, y2):
@@ -82,6 +109,8 @@ class Border(pygame.sprite.Sprite):
             self.add(horizontal_borders)
             self.image = pygame.Surface([x2 - x1, 1])
             self.rect = pygame.Rect(x1, y1, x2 - x1, 1)
+
+
 class PlayerBullet(pygame.sprite.Sprite):
     ball = load_image("ball.jpg", -1)
     ball = pygame.transform.scale(ball, (20, 20))
@@ -100,8 +129,8 @@ class PlayerBullet(pygame.sprite.Sprite):
 
     def update(self):
         self.time += 1
-        if self.speed == -1 or self.speed ==-2:
-            self.speed -=1
+        if self.speed == -1 or self.speed == -2:
+            self.speed -= 1
             return
         if self.direction == "right":
             self.rect.x += self.speed
@@ -126,24 +155,28 @@ class PlayerBullet(pygame.sprite.Sprite):
         if self.speed <= 0:
             all_sprites.remove(self)
             player_bullets.remove(self)
-        if pygame.sprite.spritecollideany(self,vertical_borders):
+        if pygame.sprite.spritecollideany(self, vertical_borders):
             self.image = PlayerBullet.ball_crush
             self.speed = -1
-        elif pygame.sprite.spritecollideany(self,horizontal_borders):
+        elif pygame.sprite.spritecollideany(self, horizontal_borders):
             self.image = PlayerBullet.ball_crush
             self.speed = -1
-        x=pygame.sprite.spritecollide(self,strelky,False)
-        y=pygame.sprite.spritecollide(self,beguni,False)
-        if(len(x)!=0):
-            pygame.sprite.spritecollide(self,strelky,True)
-            self.image=PlayerBullet.ball_crush
+        x = pygame.sprite.spritecollide(self, strelky, False)
+        y = pygame.sprite.spritecollide(self, beguni, False)
+        if (len(x) != 0):
+            pygame.sprite.spritecollide(self, strelky, True)
+            self.image = PlayerBullet.ball_crush
             self.kill()
-            usuf.floor[usuf.room]=(usuf.floor[usuf.room][0]-len(x), usuf.floor[usuf.room][1],usuf.floor[usuf.room][2],usuf.floor[usuf.room][3],usuf.floor[usuf.room][4])
-        elif(len(y)!=0):
+            usuf.floor[usuf.room] = (
+            usuf.floor[usuf.room][0] - len(x), usuf.floor[usuf.room][1], usuf.floor[usuf.room][2],
+            usuf.floor[usuf.room][3], usuf.floor[usuf.room][4])
+        elif (len(y) != 0):
             pygame.sprite.spritecollide(self, beguni, True)
             self.image = PlayerBullet.ball_crush
             self.kill()
-            usuf.floor[usuf.room] = (usuf.floor[usuf.room][0],usuf.floor[usuf.room][1] - len(y),usuf.floor[usuf.room][2],usuf.floor[usuf.room][3],usuf.floor[usuf.room][4])
+            usuf.floor[usuf.room] = (
+            usuf.floor[usuf.room][0], usuf.floor[usuf.room][1] - len(y), usuf.floor[usuf.room][2],
+            usuf.floor[usuf.room][3], usuf.floor[usuf.room][4])
 
 
 class StaticObject(pygame.sprite.Sprite):
@@ -195,24 +228,23 @@ class Chest(StaticObject):
 
     def close_chest(self):
         self.image = self.frames[0]
-life=pygame.sprite.Group()
+
+
+life = pygame.sprite.Group()
+
+
 class hill(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(life)
-        self.image=pygame.transform.scale(load_image('hill.jpg',-1),(40,80))
-        self.rect=self.image.get_rect()
-        self.rect.x=random.randint(50,70)
-        self.rect.y=random.randint(50,70)
+        self.image = pygame.transform.scale(load_image('hill.jpg', -1), (40, 80))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(60, 150)
+        self.rect.y = random.randint(60, 150)
 
-    def get(self,i):
-        usuf.list_life[i]=True
-        usuf.life=min(100,usuf.life+random.randint(10,20))
+    def get(self, i):
+        usuf.list_life[i] = True
+        usuf.life = min(100, usuf.life + random.randint(10, 20+usuf.main_floor*4))
         self.kill()
-
-
-
-
-
 
 
 class BigHole(StaticObject):
@@ -221,18 +253,18 @@ class BigHole(StaticObject):
     def __init__(self, x, y, tw, th):
         super().__init__(Chest.sheet, x, y)
         self.get_rect(tw, th)
-        self.image= pygame.Surface([0, 0])
-        #self.image = pygame.Surface([self.rect.w, self.rect.h])
+        self.image = pygame.Surface([0, 0])
+        # self.image = pygame.Surface([self.rect.w, self.rect.h])
         self.get_borders(12, 25)
 
 
 class Player(pygame.sprite.Sprite):
     sheet = load_image("playersanim.bmp", -1)
 
-    def __init__(self, cords,room):
+    def __init__(self, cords, room):
         super().__init__(player_group, all_sprites)
-        self.main_floor=0
-        self.room=room
+        self.main_floor =0
+        self.room = room
         self.x = cords[0]
         self.y = cords[1]
         self.image = pygame.Surface((1, 1))
@@ -253,12 +285,11 @@ class Player(pygame.sprite.Sprite):
         self.upper_border = pygame.sprite.Sprite()
         self.lower_border = pygame.sprite.Sprite()
         self.get_borders()
-        self.life=100
-        self.is_change=True
+        self.life = 100
+        self.is_change = True
         self.shoot_cooldown = 0
         self.bullet_speed = 10
         self.anim = "down"
-
 
     def get_event_keyboard(self, array):
         if array[pygame.K_w] == array[pygame.K_s]:
@@ -388,7 +419,6 @@ class Player(pygame.sprite.Sprite):
             self.anim = "left"
             self.shoot("left")
 
-
     def update(self):
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
@@ -449,29 +479,26 @@ class Player(pygame.sprite.Sprite):
         self.change = [0, 0]
         self.get_borders()
 
+    def cut_sheet(self, sheet, columns, rows, is_door=False):
 
-    def cut_sheet(self, sheet, columns, rows,is_door=False):
+        w = sheet.get_width() // columns
+        h = sheet.get_height() // rows
+        for j in range(rows):
+            temp = []
+            for i in range(columns):
+                a = sheet.subsurface(pygame.Rect((w * i + 17, h * j + 15), (32, 48)))
+                a = pygame.transform.scale(a, (80, 45))
+                temp.append(a)
+            if j == 0:
+                self.images_up = temp
+            elif j == 1:
+                self.images_left = temp
+            elif j == 2:
+                self.images_down = temp
+            elif j == 3:
+                self.images_right = temp
 
-            w = sheet.get_width() // columns
-            h = sheet.get_height() // rows
-            for j in range(rows):
-                temp = []
-                for i in range(columns):
-                    a = sheet.subsurface(pygame.Rect((w * i +17, h * j + 15), (32, 48)))
-                    a = pygame.transform.scale(a, (80, 45))
-                    temp.append(a)
-                if j == 0:
-                    self.images_up = temp
-                elif j == 1:
-                    self.images_left = temp
-                elif j == 2:
-                    self.images_down = temp
-                elif j == 3:
-                    self.images_right = temp
-
-
-
-    def shoot(self,direction):
+    def shoot(self, direction):
         if self.shoot_cooldown == 0:
             t = 0
             speed = self.bullet_speed
@@ -485,8 +512,8 @@ class Player(pygame.sprite.Sprite):
                 x = random.randint(self.rect.x + 20, self.rect.x + 40)
                 y = self.rect.y - 20
             elif direction == "down":
-                x = random.randint(self.rect.x+20, self.rect.x + 40)
-                y = self.rect.y + self.rect.h -30
+                x = random.randint(self.rect.x + 20, self.rect.x + 40)
+                y = self.rect.y + self.rect.h - 30
             PlayerBullet(x, y, t, speed, direction)
             self.shoot_cooldown = 20
 
@@ -499,136 +526,142 @@ class Player(pygame.sprite.Sprite):
         self.lower_border.image = pygame.Surface([w, 3])
         self.upper_border.rect = pygame.Rect(x, y, w, 3)
         self.lower_border.rect = pygame.Rect(x, y + h, w, 3)
-    def change_room(self,a):
+
+    def change_room(self, a):
         for _ in chest:
             _.close_chest()
         for _ in player_bullets:
             all_sprites.remove(_)
         player_bullets.empty()
-        global beguni,strelky
-        if(a==(0,1)):
-            if(self.room==self.lift):
+        global beguni, strelky
+        if (a == (0, 1)):
+            if (self.room == self.lift):
                 self.exit.kill()
-            self.room+=3
-            self.rect.x=30
-            self.rect.y=280
-        elif(a==(0,-1)):
-            if(self.room==self.lift):
+            self.room += 3
+            self.rect.x = 30
+            self.rect.y = 280
+        elif (a == (0, -1)):
+            if (self.room == self.lift):
                 self.exit.kill()
-            self.room-=3
-            self.rect.x=450
-            self.rect.y=470
-        elif(a==(1,0)):
-            if(self.room==self.lift):
+            self.room -= 3
+            self.rect.x = 450
+            self.rect.y = 470
+        elif (a == (1, 0)):
+            if (self.room == self.lift):
                 self.exit.kill()
-            self.room+=1
-            self.rect.x=450
-            self.rect.y=30
+            self.room += 1
+            self.rect.x = 450
+            self.rect.y = 30
 
-        elif(a==(-1,0)):
-            if(self.room==self.lift):
+        elif (a == (-1, 0)):
+            if (self.room == self.lift):
                 self.exit.kill()
-            self.room-=1
-            self.rect.x=860
-            self.rect.y=280
+            self.room -= 1
+            self.rect.x = 860
+            self.rect.y = 280
 
 
         else:
             pass
-        self.is_change=True
+        self.is_change = True
 
-        beguni=pygame.sprite.Group()
-        strelky=pygame.sprite.Group()
-        mobs=self.floor[self.room]
+        beguni = pygame.sprite.Group()
+        strelky = pygame.sprite.Group()
+        mobs = self.floor[self.room]
+        print (mobs[0],mobs[1])
         for count in range(mobs[0]):
-            mob=Strelyaet(strelky,random.randint(40,880),random.randint(40,480),load_image('sold.bmp',-1),4,4,10-count)
+            mob = Strelyaet(strelky, random.randint(40, 880), random.randint(40, 480), load_image('sold.bmp', -1), 4, 4,
+                            5 - count)
         for count in range(mobs[1]):
-            mob=Begaet(beguni,random.randint(40,880),random.randint(40,480),load_image('kek.png',-1),4,4,25-count)
-        global hod_down,hod_left,hod_up,hod_right,life
-        life=pygame.sprite.Group()
-        hod_up=pygame.sprite.Group()
-        hod_down=pygame.sprite.Group()
-        hod_left=pygame.sprite.Group()
-        hod_right=pygame.sprite.Group()
-        image=pygame.transform.scale(load_image('vorota.png',-1),(60,60))
-        if(self.room not in [0,1,2]):
-            hod=pygame.sprite.Sprite()
-            hod.image= image
-            hod.rect=hod.image.get_rect()
-            hod.rect.x=450
-            hod.rect.y=10
+            mob = Begaet(beguni, random.randint(40, 880), random.randint(40, 480), load_image('kek.png', -1), 4, 4,
+                         13 - count)
+        global hod_down, hod_left, hod_up, hod_right, life
+        life = pygame.sprite.Group()
+        hod_up = pygame.sprite.Group()
+        hod_down = pygame.sprite.Group()
+        hod_left = pygame.sprite.Group()
+        hod_right = pygame.sprite.Group()
+        image = pygame.transform.scale(load_image('vorota.png', -1), (60, 60))
+        if (self.room not in [0, 1, 2]):
+            hod = pygame.sprite.Sprite()
+            hod.image = image
+            hod.rect = hod.image.get_rect()
+            hod.rect.x = 450
+            hod.rect.y = 10
             hod_up.add(hod)
-        if(self.room not in [0,3,6]):
-            hod=pygame.sprite.Sprite()
-            hod.image=image
-            hod.rect=hod.image.get_rect()
-            hod.rect.x=15
-            hod.rect.y=280
+        if (self.room not in [0, 3, 6]):
+            hod = pygame.sprite.Sprite()
+            hod.image = image
+            hod.rect = hod.image.get_rect()
+            hod.rect.x = 15
+            hod.rect.y = 280
             hod_left.add(hod)
-        if(self.room not in [6,7,8]):
-            hod=pygame.sprite.Sprite()
-            hod.image=image
-            hod.rect=hod.image.get_rect()
-            hod.rect.x=450
-            hod.rect.y=470
+        if (self.room not in [6, 7, 8]):
+            hod = pygame.sprite.Sprite()
+            hod.image = image
+            hod.rect = hod.image.get_rect()
+            hod.rect.x = 450
+            hod.rect.y = 470
             hod_down.add(hod)
-        if(self.room not in [2,5,8]):
-            hod=pygame.sprite.Sprite()
-            hod.image=image
-            hod.rect=hod.image.get_rect()
-            hod.rect.x=880
-            hod.rect.y=280
+        if (self.room not in [2, 5, 8]):
+            hod = pygame.sprite.Sprite()
+            hod.image = image
+            hod.rect = hod.image.get_rect()
+            hod.rect.x = 880
+            hod.rect.y = 280
             hod_right.add(hod)
-        global patrons,keys
-        patrons=pygame.sprite.Group()
-        if(self.room==self.lift):
-            self.exit=pygame.sprite.Sprite()
-            self.exit.image=pygame.transform.scale(load_image('exit.png',-1),(60,60))
-            self.exit.rect=self.exit.image.get_rect()
-            self.exit.rect.x=width-200
-            self.exit.rect.y=height-200
-        keys=pygame.sprite.Group()
-
-
+        global patrons, keys
+        patrons = pygame.sprite.Group()
+        if (self.room == self.lift):
+            self.exit = pygame.sprite.Sprite()
+            self.exit.image = pygame.transform.scale(load_image('exit.png', -1), (60, 60))
+            self.exit.rect = self.exit.image.get_rect()
+            self.exit.rect.x = width - 200
+            self.exit.rect.y = height - 200
+        keys = pygame.sprite.Group()
 
     def floor_change(self):
-        self.floor={}
-        self.keys=0
-        self.list_life=[False for i in range(9)]
-        map.list=[]
-        self.all_keys=8
-        self.list_keys=[random.randint(0,8) for i in range(self.all_keys)]
-        self.lift=random.randint(0,8)
+        self.floor = {}
+        self.keys = 0
+        self.list_life = [False for i in range(9)]
+        map.list = []
+        self.all_keys = 8
+        self.list_keys = [random.randint(0, 8) for i in range(self.all_keys)]
+        self.lift = random.randint(0, 8)
         for i in range(9):
-            list_keys=[]
+            list_keys = []
             for u in range(len(self.list_keys)):
-                if(self.list_keys[u]==i):
+                if (self.list_keys[u] == i):
                     list_keys.append(u)
-            strelki=random.randint(3,4+self.main_floor//2)
-            beguni=random.randint(2,4+self.main_floor//2)
-            if(i== self.lift):
-                self.floor[i]=(strelki,beguni,True,False,list_keys)
+            strelki = random.randint(2, 3 + self.main_floor // 2)
+            beguni = random.randint(2, 4 + self.main_floor // 2)
+            if (i == self.lift):
+                self.floor[i] = (strelki, beguni, True, False, list_keys)
             else:
-                self.floor[i]=(strelki,beguni,False,False,list_keys)
-        self.change_room((0,0))
+                self.floor[i] = (strelki, beguni, False, False, list_keys)
+        self.change_room((0, 0))
         self.floor_update()
+        self.life=min(100,self.life+10)
+
     def floor_update(self):
-        self.main_floor+=1
+        self.main_floor += 1
 
 
-
-room=-1
+room = -1
 a = Chest(200, 200)
-chest=pygame.sprite.Group()
+chest = pygame.sprite.Group()
 chest.add(a)
 
 hole1 = BigHole(361, 220, 270, 85)
 hole2 = BigHole(439, 160, 110, 215)
-usuf = Player((50, 50),0)
+usuf = Player((50, 50), 0)
 patrons = pygame.sprite.Group()
 strelky = pygame.sprite.Group()
+
+
 class Patrons(pygame.sprite.Sprite):
-    image = pygame.transform.scale(load_image("pula_migela.png"), (20, 10))
+    image = pygame.transform.scale(load_image("pula_migela.png",-1), (80, 80))
+
     def __init__(self, list, group):
         super().__init__(group)
         self.list = list
@@ -636,11 +669,20 @@ class Patrons(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.list[0][0]
         self.rect.y = self.list[0][1]
+
     def update(self):
-        self.rect.x += self.list[1][0]
-        self.rect.y += self.list[1][1]
+        self.rect.x += self.list[1][0]//2
+        self.rect.y += self.list[1][1]//2
+        if(pygame.sprite.collide_mask(self, usuf)):
+            usuf.life-=2
+            self.kill()
+        if(self.rect.x<=30 or self.rect.x>=width-30 or self.rect.y<=30 or self.rect.y>=height-30):
+            self.kill()
+
+
 class Begaet(pygame.sprite.Sprite):
     image = load_image("kek.png", -1)
+
     def __init__(self, group, x, y, sheet, columns, rows, speed):
         super().__init__(group)
         self.frames = []
@@ -704,19 +746,16 @@ class Begaet(pygame.sprite.Sprite):
         self.rect.x -= self.speed
         s = random.randint(0, 3)
 
-
     def right(self):
         self.cur_frame += 1
         self.image = self.frames[8 + (self.cur_frame + 1) % 4]
         self.rect.x += self.speed
-
 
     def back(self):
         self.cur_frame += 1
         self.image = self.frames[12 + (self.cur_frame + 1) % 4]
         self.rect.y -= self.speed
         s = random.randint(0, 3)
-
 
     def forward(self):
         self.cur_frame += 1
@@ -726,29 +765,34 @@ class Begaet(pygame.sprite.Sprite):
 
 
 class Ship(pygame.sprite.Sprite):
-    image=load_image('ship.png',-1)
+    image = load_image('ship.png', -1)
+
     def __init__(self, group, x, y):
         super().__init__(group)
-        self.image=Ship.image
-        self.rect=self.image.get_rect()
-        self.rect.x=x
-        self.rect.y=y
+        self.image = Ship.image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
     def update(self):
         self.draw(screen)
-ships=pygame.sprite.Group()
-keys=pygame.sprite.Group()
+
+
+ships = pygame.sprite.Group()
+keys = pygame.sprite.Group()
+
+
 class Keys(pygame.sprite.Sprite):
-    def __init__(self,group, sheet, columns, rows,frame,x,y):
+    def __init__(self, group, sheet, columns, rows, frame, x, y):
         super().__init__(group)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = frame
-        self.image = pygame.transform.scale(self.frames[self.cur_frame],(20,40))
+        self.image = pygame.transform.scale(self.frames[self.cur_frame], (20, 40))
         self.rect = self.image.get_rect()
-        self.rect.x=x
-        self.rect.y=y
-        self.list=[self.frames[self.cur_frame] for i in range(rows*columns)]
-
+        self.rect.x = x
+        self.rect.y = y
+        self.list = [self.frames[self.cur_frame] for i in range(rows * columns)]
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
@@ -756,6 +800,7 @@ class Keys(pygame.sprite.Sprite):
             for i in range(columns):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+
 
 class Strelyaet(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('migel.png', -1), (50, 50))
@@ -769,10 +814,10 @@ class Strelyaet(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
         self.speed = speed
-        self.start_coords_x=max(30,x-80)
-        self.start_coords_y=max(30,y-80)
-        self.finish_coords_x=min(width-30,x+80)
-        self.finish_coords_y=min(height-30,y+80)
+        self.start_coords_x = max(30, x - 80)
+        self.start_coords_y = max(30, y - 80)
+        self.finish_coords_x = min(width - 30, x + 80)
+        self.finish_coords_y = min(height - 30, y + 80)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -818,23 +863,23 @@ class Strelyaet(pygame.sprite.Sprite):
             put = math.sqrt(cel_x ** 2 + cel_y ** 2)
             speed = (int(cel_x * (30 / put)), int(cel_y * (30 / put)))
             Patrons([start_pos, speed], patrons)
-            cel_x = usuf.rect.x - self.rect.x + 16+150
-            cel_y = usuf.rect.y - self.rect.y + 24+150
+            cel_x = usuf.rect.x - self.rect.x + 16 + 150
+            cel_y = usuf.rect.y - self.rect.y + 24 + 150
             put = math.sqrt(cel_x ** 2 + cel_y ** 2)
             speed = (int(cel_x * (30 / put)), int(cel_y * (30 / put)))
             Patrons([start_pos, speed], patrons)
-            cel_x = usuf.rect.x - self.rect.x + 16-150
-            cel_y = usuf.rect.y - self.rect.y + 24-150
+            cel_x = usuf.rect.x - self.rect.x + 16 - 150
+            cel_y = usuf.rect.y - self.rect.y + 24 - 150
             put = math.sqrt(cel_x ** 2 + cel_y ** 2)
             speed = (int(cel_x * (30 / put)), int(cel_y * (30 / put)))
             Patrons([start_pos, speed], patrons)
-            cel_x = usuf.rect.x - self.rect.x + 16+150
-            cel_y = usuf.rect.y - self.rect.y + 24-150
+            cel_x = usuf.rect.x - self.rect.x + 16 + 150
+            cel_y = usuf.rect.y - self.rect.y + 24 - 150
             put = math.sqrt(cel_x ** 2 + cel_y ** 2)
             speed = (int(cel_x * (30 / put)), int(cel_y * (30 / put)))
             Patrons([start_pos, speed], patrons)
-            cel_x = usuf.rect.x - self.rect.x + 16-150
-            cel_y = usuf.rect.y - self.rect.y + 24+150
+            cel_x = usuf.rect.x - self.rect.x + 16 - 150
+            cel_y = usuf.rect.y - self.rect.y + 24 + 150
             put = math.sqrt(cel_x ** 2 + cel_y ** 2)
             speed = (int(cel_x * (30 / put)), int(cel_y * (30 / put)))
             Patrons([start_pos, speed], patrons)
@@ -845,34 +890,26 @@ class Strelyaet(pygame.sprite.Sprite):
     def left(self):
         self.cur_frame += 1
         self.image = self.frames[4 + (self.cur_frame + 1) % 4]
-        if(self.rect.x-self.speed>=self.start_coords_x):
+        if (self.rect.x - self.speed >= self.start_coords_x):
             self.rect.x -= self.speed
-
-
 
     def right(self, shag=5):
         self.cur_frame += 1
         self.image = self.frames[8 + (self.cur_frame + 1) % 4]
-        if(self.rect.x+self.speed<=self.finish_coords_x):
+        if (self.rect.x + self.speed <= self.finish_coords_x):
             self.rect.x += self.speed
-
 
     def back(self, shag=5):
         self.cur_frame += 1
         self.image = self.frames[12 + (self.cur_frame + 1) % 4]
-        if(self.rect.y-self.speed>=self.start_coords_y):
+        if (self.rect.y - self.speed >= self.start_coords_y):
             self.rect.y -= self.speed
-
-
 
     def forward(self, shag=5):
         self.cur_frame += 1
         self.image = self.frames[0 + (self.cur_frame + 1) % 4]
-        if(self.rect.y+self.speed<=self.finish_coords_y):
+        if (self.rect.y + self.speed <= self.finish_coords_y):
             self.rect.y += self.speed
-
-
-
 
 
 beguni = pygame.sprite.Group()
@@ -883,18 +920,17 @@ Border(width - 60, 30, width - 60, height - 143)
 clock = pygame.time.Clock()
 running = True
 MYEVENTTYPE = 30
-pygame.time.set_timer(MYEVENTTYPE, 200)
+pygame.time.set_timer(MYEVENTTYPE, 100)
 Puliupdate = 29
 pygame.time.set_timer(Puliupdate, 1000)
-BEGUNI=28
+BEGUNI = 28
 pygame.time.set_timer(BEGUNI, 100)
-map=information_about_pers(0,520)
-usuf.is_change=True
+map = information_about_pers(0, 520)
+usuf.is_change = True
 usuf.floor_change()
-usuf.change_room((1,0))
-is_grob=False
-grob=pygame.sprite.Group()
-is_usuf_killed=False
+is_grob = False
+grob = pygame.sprite.Group()
+is_usuf_killed = False
 
 while running:
 
@@ -906,103 +942,93 @@ while running:
             strelky.update()
             patrons.update()
             beguni.update()
-            if(usuf.life<=10):
-                x=pygame.sprite.spritecollide(usuf,patrons,False)
-                if(usuf.life-len(x)*2<=0):
-                    x=usuf.rect.x
-                    y=usuf.rect.y
-                    usuf.life=0
+            if (usuf.life <= 0):
+
+
+                    x = usuf.rect.x
+                    y = usuf.rect.y
+                    usuf.life = 0
                     usuf.kill()
-                    sprite=pygame.sprite.Sprite()
-                    sprite.image=pygame.transform.scale(load_image('grob.jpg',-1),(80,80))
-                    sprite.rect=sprite.image.get_rect()
-                    sprite.rect.x=x
-                    sprite.rect.y=y
+                    sprite = pygame.sprite.Sprite()
+                    sprite.image = pygame.transform.scale(load_image('grob.jpg', -1), (80, 80))
+                    sprite.rect = sprite.image.get_rect()
+                    sprite.rect.x = x
+                    sprite.rect.y = y
                     grob.add(sprite)
-                    is_grob=True
-                else:
-                    x=pygame.sprite.spritecollide(usuf,patrons,True)
-                    if(x!=[]):
-                        usuf.life-=len(x)*2
+                    is_grob = True
 
 
 
-            else:
-                x=pygame.sprite.spritecollide(usuf,patrons,True)
-                if(x!=[]):
-                    usuf.life-=len(x)*2
 
 
 
-            pygame.time.set_timer(MYEVENTTYPE, 200)
+            pygame.time.set_timer(MYEVENTTYPE, 100)
         if (event.type == Puliupdate):
             strelky.update(True)
             pygame.time.set_timer(Puliupdate, 1500)
-        if(event.type == pygame.KEYDOWN):
-            if(event.key==103):
-                if(pygame.sprite.spritecollideany(usuf,hod_right) is not None):
-                    usuf.change_room((1,0))
-                    usuf.rect.x=15+50
-                    usuf.rect.y=280
-                elif(pygame.sprite.spritecollideany(usuf,hod_left) is not None):
-                    usuf.change_room((-1,0))
-                    usuf.rect.x=880-50
-                    usuf.rect.y=280
-                elif(pygame.sprite.spritecollideany(usuf,hod_up) is not None):
-                    usuf.change_room((0,-1))
-                    usuf.rect.x=450
-                    usuf.rect.y=470-50
-                elif(pygame.sprite.spritecollideany(usuf,hod_down) is not None):
-                    usuf.change_room((0,1))
-                    usuf.rect.x=450
-                    usuf.rect.y=10+50
-            elif(event.key==ord('o')):
-                if(usuf.room==usuf.lift and len(map.list)==usuf.all_keys and pygame.sprite.collide_mask(usuf,usuf.exit) is not None):
+        if (event.type == pygame.KEYDOWN):
+            if (event.key == 103):
+                if (pygame.sprite.spritecollideany(usuf, hod_right) is not None):
+                    usuf.change_room((1, 0))
+                    usuf.rect.x = 15 + 50
+                    usuf.rect.y = 280
+                elif (pygame.sprite.spritecollideany(usuf, hod_left) is not None):
+                    usuf.change_room((-1, 0))
+                    usuf.rect.x = 880 - 50
+                    usuf.rect.y = 280
+                elif (pygame.sprite.spritecollideany(usuf, hod_up) is not None):
+                    usuf.change_room((0, -1))
+                    usuf.rect.x = 450
+                    usuf.rect.y = 470 - 50
+                elif (pygame.sprite.spritecollideany(usuf, hod_down) is not None):
+                    usuf.change_room((0, 1))
+                    usuf.rect.x = 450
+                    usuf.rect.y = 10 + 50
+            elif (event.key == ord('o')):
+                if (usuf.room == usuf.lift and len(map.list) == usuf.all_keys and pygame.sprite.collide_mask(usuf,
+                                                                                                             usuf.exit) is not None):
                     usuf.floor_change()
-                    usuf.change_room((0,0))
+                    usuf.change_room((0, 0))
 
+        if (event.type == BEGUNI and not is_usuf_killed):
+            x = pygame.sprite.spritecollide(usuf, beguni, False)
+            if (usuf.life - len(x) * 2 <= 0):
+                x = usuf.rect.x
+                y = usuf.rect.y
+                usuf.kill()
+                is_usuf_killed = True
+                usuf.life = 0
+                sprite = pygame.sprite.Sprite()
+                sprite.image = pygame.transform.scale(load_image('grob.jpg', -1), (80, 80))
+                sprite.rect = sprite.image.get_rect()
+                sprite.rect.x = x
+                sprite.rect.y = y
+                grob.add(sprite)
+                is_grob = True
+            else:
+                if (x != []):
+                    usuf.life -= len(x) * 2
 
-        if(event.type==BEGUNI and not is_usuf_killed):
-                 x=pygame.sprite.spritecollide(usuf,beguni,False)
-                 if(usuf.life-len(x)*2<=0):
-                        x=usuf.rect.x
-                        y=usuf.rect.y
-                        usuf.kill()
-                        is_usuf_killed=True
-                        usuf.life=0
-                        sprite=pygame.sprite.Sprite()
-                        sprite.image=pygame.transform.scale(load_image('grob.jpg',-1),(80,80))
-                        sprite.rect=sprite.image.get_rect()
-                        sprite.rect.x=x
-                        sprite.rect.y=y
-                        grob.add(sprite)
-                        is_grob=True
-                 else:
-                        if(x!=[]):
-                            usuf.life-=len(x)*2
+            pygame.time.set_timer(BEGUNI, 200)
 
-                 pygame.time.set_timer(BEGUNI, 200)
-
-
-
-    if(usuf.is_change and usuf.floor[usuf.room][0]==0 and usuf.floor[usuf.room][1]==0):
-        usuf.floor[usuf.room]=[usuf.floor[usuf.room][0],usuf.floor[usuf.room][1],usuf.floor[usuf.room][2],True,usuf.floor[usuf.room][4]]
+    if (usuf.is_change and usuf.floor[usuf.room][0] == 0 and usuf.floor[usuf.room][1] == 0):
+        usuf.floor[usuf.room] = [usuf.floor[usuf.room][0], usuf.floor[usuf.room][1], usuf.floor[usuf.room][2], True,
+                                 usuf.floor[usuf.room][4]]
         for _ in chest:
             if usuf.floor[usuf.room][3]:
                 _.open_chest()
-                if(not usuf.list_life[usuf.room]):
-                    hil=hill()
-                if(pygame.sprite.spritecollideany(usuf,life) is not None):
-                    usuf.list_life[usuf.room]=True
+                if (not usuf.list_life[usuf.room]):
+                    hil = hill()
+                if (pygame.sprite.spritecollideany(usuf, life) is not None):
+                    usuf.list_life[usuf.room] = True
                     hil.get()
                 for u in ((usuf.floor[usuf.room][4])):
-                    if(u not in map.list):
-                        key=Keys(keys, load_image('keys.jpg',-1), 4, 2,u,random.randint(80,200),random.randint(80,200))
-                        print (key.rect.x,key.rect.y)
+                    if (u not in map.list):
+                        key = Keys(keys, load_image('keys.jpg', -1), 4, 2, u, random.randint(80, 200),
+                                   random.randint(80, 200))
 
 
-
-        usuf.is_change=False
+        usuf.is_change = False
 
     usuf.get_event_keyboard(pygame.key.get_pressed())
     screen.blit(room_image, (0, 0))
@@ -1025,22 +1051,21 @@ while running:
     hod_left.draw(screen)
     chest.draw(screen)
     hod_right.draw(screen)
-    if(usuf.floor[usuf.room][2]):
-        screen.blit(usuf.exit.image,usuf.exit.rect)
-    x=pygame.sprite.spritecollide(usuf,beguni,False)
-    lifes_get=pygame.sprite.spritecollide(usuf,life,False)
-    if len(lifes_get)!=0:
+    if (usuf.floor[usuf.room][2]):
+        screen.blit(usuf.exit.image, usuf.exit.rect)
+    x = pygame.sprite.spritecollide(usuf, beguni, False)
+    lifes_get = pygame.sprite.spritecollide(usuf, life, False)
+    if len(lifes_get) != 0:
         hil.get(usuf.room)
-        usuf.list_life[usuf.room]=True
+        usuf.list_life[usuf.room] = True
     if is_grob:
         grob.draw(screen)
     keys.draw(screen)
     life.draw(screen)
-    for i in pygame.sprite.spritecollide(usuf,keys,False):
-            map.list.append(i.cur_frame)
-    pygame.sprite.spritecollide(usuf,keys,True)
+    for i in pygame.sprite.spritecollide(usuf, keys, False):
+        map.list.append(i.cur_frame)
+    pygame.sprite.spritecollide(usuf, keys, True)
     pygame.display.flip()
     clock.tick(60)
-
 
 pygame.quit()
