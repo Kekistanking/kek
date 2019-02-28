@@ -43,7 +43,7 @@ def load_image(name, colorkey=None):
 room_image = load_image("room1.bmp")
 room_image = pygame.transform.scale(room_image, (960, 540))
 
-
+#Миникарта, полоса жизней, инвентарь
 class information_about_pers():
     def __init__(self, a, b, list=[]):
         self.start_x = a
@@ -232,7 +232,7 @@ class Chest(StaticObject):
 
 life = pygame.sprite.Group()
 
-
+#хил, выпадающий из сундуков
 class hill(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(life)
@@ -526,7 +526,7 @@ class Player(pygame.sprite.Sprite):
         self.lower_border.image = pygame.Surface([w, 3])
         self.upper_border.rect = pygame.Rect(x, y, w, 3)
         self.lower_border.rect = pygame.Rect(x, y + h, w, 3)
-
+    #меняем комнату
     def change_room(self, a):
         for _ in chest:
             _.close_chest()
@@ -544,8 +544,8 @@ class Player(pygame.sprite.Sprite):
             if (self.room == self.lift):
                 self.exit.kill()
             self.room -= 3
-            self.rect.x = 450
-            self.rect.y = 470
+            self.rect.x = 430
+            self.rect.y = 450
         elif (a == (1, 0)):
             if (self.room == self.lift):
                 self.exit.kill()
@@ -557,7 +557,7 @@ class Player(pygame.sprite.Sprite):
             if (self.room == self.lift):
                 self.exit.kill()
             self.room -= 1
-            self.rect.x = 860
+            self.rect.x = 700
             self.rect.y = 280
 
 
@@ -568,13 +568,13 @@ class Player(pygame.sprite.Sprite):
         beguni = pygame.sprite.Group()
         strelky = pygame.sprite.Group()
         mobs = self.floor[self.room]
-        print (mobs[0],mobs[1])
+
         for count in range(mobs[0]):
-            mob = Strelyaet(strelky, random.randint(40, 880), random.randint(40, 480), load_image('sold.bmp', -1), 4, 4,
-                            5 - count)
+            mob = Strelyaet(strelky, random.randint(40, 850), random.randint(40, 480), load_image('sold.bmp', -1), 4, 4,
+                            5 - count+usuf.main_floor//2)
         for count in range(mobs[1]):
-            mob = Begaet(beguni, random.randint(40, 880), random.randint(40, 480), load_image('kek.png', -1), 4, 4,
-                         13 - count)
+            mob = Begaet(beguni, random.randint(40, 850), random.randint(40, 480), load_image('kek.png', -1), 4, 4,
+                         13 - count+usuf.main_floor//2)
         global hod_down, hod_left, hod_up, hod_right, life
         life = pygame.sprite.Group()
         hod_up = pygame.sprite.Group()
@@ -587,7 +587,7 @@ class Player(pygame.sprite.Sprite):
             hod.image = image
             hod.rect = hod.image.get_rect()
             hod.rect.x = 450
-            hod.rect.y = 10
+            hod.rect.y = -20
             hod_up.add(hod)
         if (self.room not in [0, 3, 6]):
             hod = pygame.sprite.Sprite()
@@ -607,11 +607,12 @@ class Player(pygame.sprite.Sprite):
             hod = pygame.sprite.Sprite()
             hod.image = image
             hod.rect = hod.image.get_rect()
-            hod.rect.x = 880
+            hod.rect.x = 890
             hod.rect.y = 280
             hod_right.add(hod)
         global patrons, keys
         patrons = pygame.sprite.Group()
+        #лифт на следующий этаж
         if (self.room == self.lift):
             self.exit = pygame.sprite.Sprite()
             self.exit.image = pygame.transform.scale(load_image('exit.png', -1), (60, 60))
@@ -619,7 +620,7 @@ class Player(pygame.sprite.Sprite):
             self.exit.rect.x = width - 200
             self.exit.rect.y = height - 200
         keys = pygame.sprite.Group()
-
+    #меняем этаж
     def floor_change(self):
         self.floor = {}
         self.keys = 0
@@ -628,6 +629,7 @@ class Player(pygame.sprite.Sprite):
         self.all_keys = 8
         self.list_keys = [random.randint(0, 8) for i in range(self.all_keys)]
         self.lift = random.randint(0, 8)
+        #идет распределение мобов и ключей по комнатам
         for i in range(9):
             list_keys = []
             for u in range(len(self.list_keys)):
@@ -658,7 +660,7 @@ usuf = Player((50, 50), 0)
 patrons = pygame.sprite.Group()
 strelky = pygame.sprite.Group()
 
-
+#пули крипов
 class Patrons(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image("pula_migela.png",-1), (80, 80))
 
@@ -679,7 +681,7 @@ class Patrons(pygame.sprite.Sprite):
         if(self.rect.x<=30 or self.rect.x>=width-30 or self.rect.y<=30 or self.rect.y>=height-30):
             self.kill()
 
-
+#бегающие мобы
 class Begaet(pygame.sprite.Sprite):
     image = load_image("kek.png", -1)
 
@@ -764,24 +766,11 @@ class Begaet(pygame.sprite.Sprite):
         s = random.randint(0, 3)
 
 
-class Ship(pygame.sprite.Sprite):
-    image = load_image('ship.png', -1)
-
-    def __init__(self, group, x, y):
-        super().__init__(group)
-        self.image = Ship.image
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-    def update(self):
-        self.draw(screen)
 
 
-ships = pygame.sprite.Group()
 keys = pygame.sprite.Group()
 
-
+#ключи
 class Keys(pygame.sprite.Sprite):
     def __init__(self, group, sheet, columns, rows, frame, x, y):
         super().__init__(group)
@@ -801,7 +790,7 @@ class Keys(pygame.sprite.Sprite):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
-
+#стрелки
 class Strelyaet(pygame.sprite.Sprite):
     image = pygame.transform.scale(load_image('migel.png', -1), (50, 50))
     image.set_colorkey((255, 255, 255))
@@ -857,6 +846,7 @@ class Strelyaet(pygame.sprite.Sprite):
                     else:
                         self.back()
         if (shoot):
+            #расчитывается координаты вектора на который смещается пуля
             start_pos = (self.rect.x, self.rect.y)
             cel_x = usuf.rect.x - self.rect.x + 16
             cel_y = usuf.rect.y - self.rect.y + 24
@@ -970,20 +960,20 @@ while running:
             if (event.key == 103):
                 if (pygame.sprite.spritecollideany(usuf, hod_right) is not None):
                     usuf.change_room((1, 0))
-                    usuf.rect.x = 15 + 50
+                    usuf.rect.x = 15 + 45
                     usuf.rect.y = 280
                 elif (pygame.sprite.spritecollideany(usuf, hod_left) is not None):
                     usuf.change_room((-1, 0))
-                    usuf.rect.x = 880 - 50
+                    usuf.rect.x = 880 - 60
                     usuf.rect.y = 280
                 elif (pygame.sprite.spritecollideany(usuf, hod_up) is not None):
                     usuf.change_room((0, -1))
                     usuf.rect.x = 450
-                    usuf.rect.y = 470 - 50
+                    usuf.rect.y = 470 - 40
                 elif (pygame.sprite.spritecollideany(usuf, hod_down) is not None):
                     usuf.change_room((0, 1))
                     usuf.rect.x = 450
-                    usuf.rect.y = 10 + 50
+                    usuf.rect.y = 10 + 25
             elif (event.key == ord('o')):
                 if (usuf.room == usuf.lift and len(map.list) == usuf.all_keys and pygame.sprite.collide_mask(usuf,
                                                                                                              usuf.exit) is not None):
@@ -1010,7 +1000,7 @@ while running:
                     usuf.life -= len(x) * 2
 
             pygame.time.set_timer(BEGUNI, 200)
-
+    #открытие сундуков и дроп с них
     if (usuf.is_change and usuf.floor[usuf.room][0] == 0 and usuf.floor[usuf.room][1] == 0):
         usuf.floor[usuf.room] = [usuf.floor[usuf.room][0], usuf.floor[usuf.room][1], usuf.floor[usuf.room][2], True,
                                  usuf.floor[usuf.room][4]]
@@ -1021,7 +1011,7 @@ while running:
                     hil = hill()
                 if (pygame.sprite.spritecollideany(usuf, life) is not None):
                     usuf.list_life[usuf.room] = True
-                    hil.get()
+                    hil.get(usuf.room)
                 for u in ((usuf.floor[usuf.room][4])):
                     if (u not in map.list):
                         key = Keys(keys, load_image('keys.jpg', -1), 4, 2, u, random.randint(80, 200),
@@ -1042,7 +1032,6 @@ while running:
     strelky.draw(screen)
     patrons.draw(screen)
     beguni.draw(screen)
-    ships.draw(screen)
     map.life(usuf.life)
     map.minimap(usuf.room)
     map.inventar()
