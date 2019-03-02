@@ -85,8 +85,11 @@ def start_screen():
                     counter -= 1
                 elif event.key == pygame.K_s:
                     counter += 1
-        screen.blit(fon_list[counter % 4], (0, 0))
-        pygame.display.flip()
+        try:
+            screen.blit(fon_list[counter % 4], (0, 0))
+            pygame.display.flip()
+        except Exception:
+            return
 
 
 # Правила
@@ -164,12 +167,15 @@ def get_record():
                 else:
                     if len(text) < 13:
                         text += event.unicode
-        screen.blit(fon, (0, 0))
-        screen.blit(txt_surface1, (400, 100))
-        txt_surface = font.render(text, True, color)
-        screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-        pygame.draw.rect(screen, color, input_box, 2)
-        pygame.display.flip()
+        try:
+            screen.blit(fon, (0, 0))
+            screen.blit(txt_surface1, (400, 100))
+            txt_surface = font.render(text, True, color)
+            screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
+            pygame.draw.rect(screen, color, input_box, 2)
+            pygame.display.flip()
+        except Exception:
+            return
 
 
 # Пауза
@@ -1183,13 +1189,15 @@ def main():
                         hil.get(usuf.room)
                     for u in (usuf.floor[usuf.room][4]):
                         if u not in usuf.map.list:
-                            key = Keys(keys, load_image('keys.png', -1), 4, 1, u,
+                            key = Keys(keys, load_image('keys.bmp', -1), 4, 1, u,
                                        random.randint(80, 200),
                                        random.randint(80, 200))
 
             usuf.is_change = False
-
-        usuf.get_event_keyboard(pygame.key.get_pressed())
+        try:
+            usuf.get_event_keyboard(pygame.key.get_pressed())
+        except Exception:
+            return
         screen.blit(room_image, (0, 0))
         all_sprites.draw(screen)
         for _ in mob_group:
