@@ -275,10 +275,11 @@ class PlayerBullet(pygame.sprite.Sprite):
     ball = load_image("ball.png", -1)
     ball = pygame.transform.scale(ball, (20, 20))
     ball_crush = load_image("ball_crush.png", -1)
-    ball_crush = pygame.transform.scale(ball_crush, (20, 20))
+    ball_crush = pygame.transform.scale(ball_crush, (30, 30))
 
-    def __init__(self, x, y, t, speed, direction):
+    def __init__(self, x, y, t, speed, direction, special):
         super().__init__(all_sprites, player_bullets)
+        self.special = special
         self.image = PlayerBullet.ball
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -310,17 +311,18 @@ class PlayerBullet(pygame.sprite.Sprite):
             self.rect.y += self.speed
             if self.time >= 35:
                 self.speed -= 1
-        if self.speed == 3:
-            self.image = PlayerBullet.ball_crush
+        if self.special is False:
+            if self.speed == 3:
+                self.image = PlayerBullet.ball_crush
+            if pygame.sprite.spritecollideany(self, vertical_borders):
+                self.image = PlayerBullet.ball_crush
+                self.speed = -1
+            elif pygame.sprite.spritecollideany(self, horizontal_borders):
+                self.image = PlayerBullet.ball_crush
+                self.speed = -1
         if self.speed <= 0:
             all_sprites.remove(self)
             player_bullets.remove(self)
-        if pygame.sprite.spritecollideany(self, vertical_borders):
-            self.image = PlayerBullet.ball_crush
-            self.speed = -1
-        elif pygame.sprite.spritecollideany(self, horizontal_borders):
-            self.image = PlayerBullet.ball_crush
-            self.speed = -1
         x = pygame.sprite.spritecollide(self, strelky, False)
         y = pygame.sprite.spritecollide(self, beguni, False)
         if (len(x) != 0):
@@ -339,6 +341,9 @@ class PlayerBullet(pygame.sprite.Sprite):
                 usuf.floor[usuf.room][0], usuf.floor[usuf.room][1] - len(y),
                 usuf.floor[usuf.room][2],
                 usuf.floor[usuf.room][3], usuf.floor[usuf.room][4])
+        if self.rect.x <= 0 or self.rect.y <= 0 or self.rect.x >= 920 or self.rect.y >= 640:
+            self.kill()
+
 
 
 # Твердый предмет
@@ -396,6 +401,18 @@ class Chest(StaticObject):
 
 life = pygame.sprite.Group()
 
+class Special(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__(life)
+        self.image = pygame.transform.scale(load_image('grob.jpg', -1), (64, 64))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(60, 150)
+        self.rect.y = random.randint(60, 150)
+
+    def get(self, i):
+        usuf.special = 600
+        self.kill()
+        self.special_bullet=10
 
 # хил, выпадающий из сундуков
 class Heal(pygame.sprite.Sprite):
@@ -430,7 +447,7 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, cords, room):
         super().__init__(player_group, all_sprites)
-        self.main_floor = 0
+        self.main_floor = 1
         self.room = room
         self.x = cords[0]
         self.y = cords[1]
@@ -458,6 +475,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_speed = 10
         self.map = InformationAboutPers(0, 520)
         self.anim = "down"
+        self.special = 0
 
     # Получение значений клавиш
     def get_event_keyboard(self, array):
@@ -647,6 +665,7 @@ class Player(pygame.sprite.Sprite):
 
         self.change = [0, 0]
         self.get_borders()
+        self.special -= 1
 
     def cut_sheet(self, sheet, columns, rows, is_door=False):
 
@@ -684,8 +703,11 @@ class Player(pygame.sprite.Sprite):
             elif direction == "down":
                 x = random.randint(self.rect.x + 20, self.rect.x + 40)
                 y = self.rect.y + self.rect.h - 30
-            PlayerBullet(x, y, t, speed, direction)
-            self.shoot_cooldown = 20
+            if self.special > 0:
+                PlayerBullet(x, y, t, 5, direction,True)
+            else:
+                PlayerBullet(x, y, t, speed, direction,False)
+            self.shoot_cooldown = 0
 
     # Границы персонажа
     def get_borders(self):
@@ -700,6 +722,7 @@ class Player(pygame.sprite.Sprite):
 
     # меняем комнату
     def change_room(self, a):
+        special = pygame.sprite.Sprite
         for _ in chest:
             _.close_chest()
         for _ in player_bullets:
@@ -741,11 +764,11 @@ class Player(pygame.sprite.Sprite):
         mobs = self.floor[self.room]
 
         for count in range(mobs[0]):
-            mob = Strelyaet(strelky, random.randint(40, 850), random.randint(40, 480),
+            mob = Strelyaet(strelky, random.randint(100, 800), random.randint(80, 430),
                             load_image('sold1.bmp', -1), 4, 4,
                             5 - count + usuf.main_floor // 2)
         for count in range(mobs[1]):
-            mob = Begaet(beguni, random.randint(40, 850), random.randint(40, 480),
+            mob = Begaet(beguni, random.randint(200, 700), random.randint(150, 300),
                          load_image('kek.png', -1), 4, 4,
                          13 - count + usuf.main_floor // 2)
         global hod_down, hod_left, hod_up, hod_right, life
@@ -798,6 +821,7 @@ class Player(pygame.sprite.Sprite):
     def floor_change(self):
         self.floor = {}
         self.keys = 0
+        self.special_bullet=random.randint(0,9)
         self.list_life = [False for i in range(9)]
         usuf.map.list = []
         self.all_keys = 8
@@ -850,7 +874,7 @@ class Patrons(pygame.sprite.Sprite):
         self.rect.x += self.list[1][0] // 2
         self.rect.y += self.list[1][1] // 2
         if (pygame.sprite.collide_mask(self, usuf)):
-            usuf.life -= 6
+            usuf.life -= 4
             self.kill()
         if (
                                 self.rect.x <= 30 or self.rect.x >= width - 30 or self.rect.y <= 30 or self.rect.y >= height - 30):
@@ -1182,8 +1206,11 @@ def main():
             for _ in chest:
                 if usuf.floor[usuf.room][3]:
                     _.open_chest()
+                    if usuf.room==usuf.special_bullet:
+                        usuf.special = 600
                     if not usuf.list_life[usuf.room]:
                         hil = Heal()
+                        special = Special()
                     if pygame.sprite.spritecollideany(usuf, life) is not None:
                         usuf.list_life[usuf.room] = True
                         hil.get(usuf.room)
