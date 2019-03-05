@@ -1,11 +1,4 @@
-record1 1
-record2 2
-record3 3
-record4 4
-record5 5
-Bogdan 1
-dada 1
-record7 1
-record6 1
-Bogdan2 1
-Bogdan3 1
+abc 1
+bcd 1
+cde 1
+abc 2

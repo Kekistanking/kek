@@ -900,7 +900,7 @@ class Patrons(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.list[1][0] // 2
         self.rect.y += self.list[1][1] // 2
-        if pygame.sprite.collide_mask(self, usuf):
+        if (pygame.sprite.collide_mask(self, usuf)):
             usuf.life -= 2 * difficulty
             self.kill()
         if (
@@ -1183,22 +1183,22 @@ def main():
                 pygame.time.set_timer(Puliupdate, 1500)
             if event.type == pygame.KEYDOWN:
                 if event.key == 103:
-                    if pygame.sprite.spritecollideany(usuf, hod_right) is not None:
+                     if pygame.sprite.spritecollideany(usuf, hod_right) is not None:
                         usuf.change_room((1, 0))
                         usuf.rect.x = 15 + 45
                         usuf.rect.y = 280
-                    elif pygame.sprite.spritecollideany(usuf, hod_left) is not None:
+                     elif pygame.sprite.spritecollideany(usuf, hod_left) is not None:
                         usuf.change_room((-1, 0))
                         usuf.rect.x = 880 - 60
                         usuf.rect.y = 280
-                    elif pygame.sprite.spritecollideany(usuf, hod_up) is not None:
+                     elif pygame.sprite.spritecollideany(usuf, hod_up) is not None:
                         usuf.change_room((0, -1))
                         usuf.rect.x = 450
                         usuf.rect.y = 470 - 40
-                    elif pygame.sprite.spritecollideany(usuf, hod_down) is not None:
+                     elif pygame.sprite.spritecollideany(usuf, hod_down) is not None:
                         usuf.change_room((0, 1))
                         usuf.rect.x = 450
-                        usuf.rect.y = 10 + 2
+                        usuf.rect.y = 10 + 25
                 elif event.key == ord('o'):
                     if (usuf.room == usuf.lift and len(
                             usuf.map.list) == usuf.all_keys and

@@ -6,7 +6,7 @@ import sys
 
 FPS = 80
 pygame.init()
-difficulty = 0
+difficulty = 3
 size = width, height = 960, 620
 screen = pygame.display.set_mode(size)
 const = 3
@@ -129,7 +129,14 @@ def rules_screen():
 def record_screen():
     fon = pygame.transform.scale(load_image("Blank.png"), (960, 620))
     font = pygame.font.Font(None, 64)
-    with open("data/records.txt", 'r') as records:
+    if difficulty == 3:
+        path = "data/recordsHard.txt"
+    elif difficulty == 2:
+        path = "data/recordsNormal.txt"
+    else:
+        path = "data/recordsEasy.txt"
+
+    with open(path, 'r') as records:
         rlist = [line for line in records]
     color = pygame.Color("White")
     screen.blit(fon, (0, 0))
@@ -139,7 +146,8 @@ def record_screen():
         v = x.rfind(" ")
         b = x[:v]
         temp.append((a, b))
-    temp.sort(reverse=True)
+
+    temp.sort(key=lambda x: -x[0])
     if len(temp) > 5:
         for i in range(5):
             text = "%s %d" % (temp[i][1], temp[i][0])
@@ -167,6 +175,12 @@ def record_screen():
 def get_record():
     fon = pygame.transform.scale(load_image("Blank.png"), (960, 620))
     color = pygame.Color("White")
+    if difficulty == 3:
+        path = "data/recordsHard.txt"
+    elif difficulty == 2:
+        path = "data/recordsNormal.txt"
+    else:
+        path = "data/recordsEasy.txt"
     font = pygame.font.Font(None, 64)
     screen.blit(fon, (0, 0))
     text1 = "Введите имя"
@@ -181,7 +195,7 @@ def get_record():
                 terminate()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    with open("data/records.txt", 'a') as records:
+                    with open(path, 'a') as records:
                         records.write("\n%s %d" % (text, usuf.main_floor))
                     start_screen()
                 elif event.key == pygame.K_BACKSPACE:
@@ -848,7 +862,7 @@ class Player(pygame.sprite.Sprite):
         self.picked = False
         self.floor = {}
         self.keys = 0
-        self.special_bullet = random.randint(0, 9)
+        self.special_bullet = random.randint(0, 8)
         self.list_life = [False for i in range(9)]
         usuf.map.list = []
         self.all_keys = 8
@@ -903,8 +917,8 @@ class Patrons(pygame.sprite.Sprite):
         if pygame.sprite.collide_mask(self, usuf):
             usuf.life -= 2 * difficulty
             self.kill()
-        if (
-                                self.rect.x <= 30 or self.rect.x >= width - 30 or self.rect.y <= 30 or self.rect.y >= height - 30):
+        if (self.rect.x <= 30 or self.rect.x >=
+                width - 30 or self.rect.y <= 30 or self.rect.y >= height - 30):
             self.kill()
 
 
@@ -1106,19 +1120,19 @@ class Strelyaet(pygame.sprite.Sprite):
     def left(self):
         self.cur_frame += 1
         self.image = self.frames[4 + (self.cur_frame + 1) % 4]
-        if (self.rect.x - self.speed >= self.start_coords_x):
+        if self.rect.x - self.speed >= self.start_coords_x:
             self.rect.x -= self.speed
 
     def right(self, shag=5):
         self.cur_frame += 1
         self.image = self.frames[8 + (self.cur_frame + 1) % 4]
-        if (self.rect.x + self.speed <= self.finish_coords_x):
+        if self.rect.x + self.speed <= self.finish_coords_x:
             self.rect.x += self.speed
 
     def back(self, shag=5):
         self.cur_frame += 1
         self.image = self.frames[12 + (self.cur_frame + 1) % 4]
-        if (self.rect.y - self.speed >= self.start_coords_y):
+        if self.rect.y - self.speed >= self.start_coords_y:
             self.rect.y -= self.speed
 
     def forward(self, shag=5):
@@ -1132,6 +1146,7 @@ beguni = pygame.sprite.Group()
 
 
 def main():
+    global special
     Border(50, 30, width - 60, 30)
     Border(50, height - 143, width - 60, height - 143)
     Border(50, 30, 50, height - 143)
@@ -1198,11 +1213,11 @@ def main():
                     elif pygame.sprite.spritecollideany(usuf, hod_down) is not None:
                         usuf.change_room((0, 1))
                         usuf.rect.x = 450
-                        usuf.rect.y = 10 + 2
+                        usuf.rect.y = 10 + 25
                 elif event.key == ord('o'):
                     if (usuf.room == usuf.lift and len(
                             usuf.map.list) == usuf.all_keys and
-                                pygame.sprite.collide_mask(usuf, usuf.exit)
+                            pygame.sprite.collide_mask(usuf, usuf.exit)
                             is not None):
                         usuf.floor_change()
                         usuf.change_room((0, 0))
@@ -1234,20 +1249,15 @@ def main():
             usuf.floor[usuf.room] = [usuf.floor[usuf.room][0], usuf.floor[usuf.room][1],
                                      usuf.floor[usuf.room][2], True,
                                      usuf.floor[usuf.room][4]]
+
             for _ in chest:
                 if usuf.floor[usuf.room][3]:
                     _.open_chest()
                     if usuf.room == usuf.special_bullet and usuf.picked is False:
                         spec = Special()
-                        if pygame.sprite.spritecollideany(usuf, special):
-                            print(1)
-                            spec.get(usuf.room)
-                            usuf.picked = True
+
                     if not usuf.list_life[usuf.room]:
                         hil = Heal()
-                    if pygame.sprite.spritecollideany(usuf, life) is not None:
-                        usuf.list_life[usuf.room] = True
-                        hil.get(usuf.room)
                     for u in (usuf.floor[usuf.room][4]):
                         if u not in usuf.map.list:
                             key = Keys(keys, load_image('keys.bmp', -1), 4, 1, u,
@@ -1295,6 +1305,9 @@ def main():
         pygame.sprite.spritecollide(usuf, keys, True)
         pygame.display.flip()
         clock.tick(60)
+        if pygame.sprite.spritecollideany(usuf, special) is not None:
+            spec.get(usuf.room)
+            usuf.picked = True
 
     pygame.quit()
 

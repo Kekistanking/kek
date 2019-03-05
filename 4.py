@@ -903,8 +903,8 @@ class Patrons(pygame.sprite.Sprite):
         if pygame.sprite.collide_mask(self, usuf):
             usuf.life -= 2 * difficulty
             self.kill()
-        if (
-                                self.rect.x <= 30 or self.rect.x >= width - 30 or self.rect.y <= 30 or self.rect.y >= height - 30):
+        if (self.rect.x <= 30 or self.rect.x >= width - 30 or
+                self.rect.y <= 30 or self.rect.y >= height - 30):
             self.kill()
 
 
@@ -1198,11 +1198,11 @@ def main():
                     elif pygame.sprite.spritecollideany(usuf, hod_down) is not None:
                         usuf.change_room((0, 1))
                         usuf.rect.x = 450
-                        usuf.rect.y = 10 + 2
+                        usuf.rect.y = 10 + 25
                 elif event.key == ord('o'):
                     if (usuf.room == usuf.lift and len(
                             usuf.map.list) == usuf.all_keys and
-                                pygame.sprite.collide_mask(usuf, usuf.exit)
+                            pygame.sprite.collide_mask(usuf, usuf.exit)
                             is not None):
                         usuf.floor_change()
                         usuf.change_room((0, 0))
