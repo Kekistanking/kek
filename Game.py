@@ -69,7 +69,7 @@ def start_screen():
                     if counter % 4 == 0:
                         usuf.floor_change()
                         usuf.room = random.randint(1, 8)
-                        usuf.main_floor = 0
+                        usuf.main_floor = 1
                         usuf.rect.x = 50
                         usuf.rect.y = 50
                         usuf.life = 100
@@ -142,22 +142,25 @@ def record_screen():
     screen.blit(fon, (0, 0))
     temp = []
     for x in rlist:
-        a = int(x.split(" ")[-1])
+        a = int(x.split(" ")[-2])
+        b = int (x.split(" ")[-1])
         v = x.rfind(" ")
-        b = x[:v]
-        temp.append((a, b))
+        x = x[:v]
+        v1 = x.rfind(" ")
+        c = x[:v1]
+        temp.append((a, b, c))
 
     temp.sort(key=lambda x: -x[0])
     if len(temp) > 5:
         for i in range(5):
-            text = "%s %d" % (temp[i][1], temp[i][0])
+            text = "%s  %s %d  %s %d" % ("Player:" + temp[i][2], "Floor:",temp[i][0], "Keys:",temp[i][1])
             txt_surface = font.render(text, True, color)
-            screen.blit(txt_surface, (100, i * 50 + 100))
+            screen.blit(txt_surface, (50, i * 50 + 100))
     else:
         for i in range(len(temp)):
-            text = "%s %d" % (temp[i][1], temp[i][0])
+            text = "%s  %s %d  %s %d" % ("Player:" + temp[i][2], "Floor:", temp[i][0], "Keys:", temp[i][1])
             txt_surface = font.render(text, True, color)
-            screen.blit(txt_surface, (100, i * 50 + 100))
+            screen.blit(txt_surface, (50, i * 50 + 100))
     try:
         while True:
             for event in pygame.event.get():
@@ -196,7 +199,7 @@ def get_record():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     with open(path, 'a') as records:
-                        records.write("\n%s %d" % (text, usuf.main_floor))
+                        records.write("\n%s %d %d" % (text, usuf.main_floor, len(usuf.map.list)))
                     start_screen()
                 elif event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
